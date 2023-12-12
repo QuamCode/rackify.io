@@ -1,0 +1,115 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+#server-info-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+#server-info-container {
+  background: #ffffff; /* Soft white background */
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  line-height: 1.6;
+  max-width: 400px; /* Adjust as needed */
+}
+
+#server-info-container h2 {
+  font-size: 1.4em;
+  margin-bottom: 20px;
+}
+
+#server-info-container p {
+  margin-bottom: 10px;
+}
+
+#close-server-info {
+  background-color: #ff4d4d; /* Bright red color */
+  color: white;
+  padding: 10px 20px;
+  margin: 10px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  float: right; /* Align to the right */
+}
+
+#close-server-info:hover {
+  background-color: #ff3333; /* Slightly darker red on hover */
+}
+
+#close-server-info:before {
+  content: ''; /* Unicode cross symbol */
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+label {
+  margin-top: 10px;
+  display: block;
+}
+
+#mapSizeInput {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 5;
+}
+
+@media screen and (max-width: 600px) {
+  #server-info-container {
+    width: 100%;
+    border-radius: 0;
+  }
+}
