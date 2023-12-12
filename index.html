@@ -17,9 +17,20 @@
       <input type="number" id="ytiles" name="ytiles" min="1">
   
       <button onclick="Isometric.initialize()">Generate Map</button>
-      
   </div>
-  
+  <div id="server-info-overlay" style="display: none;">
+    <div id="server-info-container">
+      <h2>Server Details</h2>
+      <p><strong>ID:</strong> <span id="server-id"></span></p>
+      <p><strong>Name:</strong> <span id="server-name"></span></p>
+      <p><strong>RU:</strong> <span id="server-ru"></span></p>
+      <p><strong>Power:</strong> <span id="server-power"></span> watts</p>
+      <button id="close-server-info">Close</button>
+      <button id="modify-server-details">Modify</button>
+    </div>
+  </div>
   <canvas id="isocanvas"></canvas>
+
+  <div id="infoBox" style="display: none;"></div>
   </body>
 </html>

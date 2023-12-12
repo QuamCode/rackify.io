@@ -1,4 +1,6 @@
 // A simple isometric tile renderer
+var serverInfoDict = {};
+var currentID = 0;
 var Isometric = {
 
   originX: 0, // offset from left
@@ -18,6 +20,8 @@ var Isometric = {
   showCoordinates: false,
   tileColumnOffset: 100, // pixels
   tileRowOffset: 50, // pixels
+  infoBoxOpen: false,
+  canvasClickEnabled: true,
   // ...
 
   // New properties for dynamic map sizing
@@ -27,6 +31,7 @@ var Isometric = {
   isDragging: false,
   lastMouseX: null,
   lastMouseY: null,
+  
 
   initialize: function() {
     var xTilesInput = parseInt(document.getElementById('xtiles').value, 10);
@@ -47,8 +52,10 @@ var Isometric = {
   // New method to generate a blank map
   generateBlankMap: function() {
     IsometricMap.map = new Array(this.userDefinedXtiles);
+    IsometricMap.rackIds = new Array(this.userDefinedXtiles); // Initialize rackIds
     for (var i = 0; i < this.userDefinedXtiles; i++) {
-      IsometricMap.map[i] = new Array(this.userDefinedYtiles).fill(1); // Fill with default tile index
+      IsometricMap.map[i] = new Array(this.userDefinedYtiles).fill(1);
+      IsometricMap.rackIds[i] = new Array(this.userDefinedYtiles).fill(null); // Initialize rackIds with null
     }
   },
 
@@ -119,10 +126,12 @@ var Isometric = {
       self.redrawTiles();
     });
 
-    $(window).on('click', function(event) {
+    this.canvas.on('contextmenu', function(e) {
+      e.preventDefault(); // Prevent the context menu from showing up
+    
       var canvasOffset = self.canvas.offset();
-      var mouseX = event.clientX - canvasOffset.left;
-      var mouseY = event.clientY - canvasOffset.top;
+      var mouseX = e.clientX - canvasOffset.left;
+      var mouseY = e.clientY - canvasOffset.top;
     
       // Calculate the clicked tile coordinates
       var tileX = Math.round((mouseX - self.tileColumnOffset / 2 - self.originX) / self.tileColumnOffset - (mouseY - self.tileRowOffset / 2 - self.originY) / self.tileRowOffset);
@@ -130,24 +139,97 @@ var Isometric = {
     
       // Check if the clicked tile is within bounds
       if (tileX >= 0 && tileX < self.Xtiles && tileY >= 0 && tileY < self.Ytiles) {
-        // Change the tile in the map index to 0
-        IsometricMap.map[tileX][tileY] = 0;
-    
-        // Redraw the tiles to reflect the change
+        // Remove the tile
+        IsometricMap.map[tileX][tileY] = 1; // Set it back to the default tile
+        IsometricMap.rackIds[tileX][tileY] = null;
+        IsometricMap.tileTypes[tileX][tileY] = tileTypes[0]; // Set it as 'Default'
         self.redrawTiles();
       }
-    
-      // Toggle the showCoordinates property
-      self.showCoordinates = !self.showCoordinates;
     });
+    
 
+    this.canvas.on('click', function(event) {
+      if (self.canvasClickEnabled) {
+        // Handle canvas click logic here
+        var canvasOffset = self.canvas.offset();
+        var mouseX = event.clientX - canvasOffset.left;
+        var mouseY = event.clientY - canvasOffset.top;
+
+        // Check if the info box is open
+        if (self.infoBoxOpen) {
+          var infoBoxElement = $('#server-info-overlay');
+
+          // Check if the click was inside the info box
+          if (!infoBoxElement.is(event.target) && infoBoxElement.has(event.target).length === 0) {
+            // Click was outside the info box, so close it and allow interaction with tiles
+            self.closeInfoBox();
+          }
+          return;
+        }
+
+        // Calculate the clicked tile coordinates
+        var tileX = Math.round((mouseX - self.tileColumnOffset / 2 - self.originX) / self.tileColumnOffset - (mouseY - self.tileRowOffset / 2 - self.originY) / self.tileRowOffset);
+        var tileY = Math.round((mouseX - self.tileColumnOffset / 2 - self.originX) / self.tileColumnOffset + (mouseY - self.tileRowOffset / 2 - self.originY) / self.tileRowOffset);
+
+        // Check if the clicked tile is within bounds
+        if (tileX >= 0 && tileX < self.Xtiles && tileY >= 0 && tileY < self.Ytiles) {
+          var currentTileValue = IsometricMap.map[tileX][tileY];
+          if (currentTileValue === 0) {
+            // Tile is already a server rack, display info box
+            currentID = IsometricMap.rackIds[tileX][tileY];
+            console.log(currentID);
+            self.displayInfoBox(tileX, tileY, currentID);
+          } else {
+            // Change the tile in the map index to 0 and assign a random 'rack-id'
+            IsometricMap.map[tileX][tileY] = 0;
+            var rackId = self.generateRandomRackId();
+            IsometricMap.rackIds[tileX][tileY] = rackId;
+            serverInfoDict[rackId] = {
+              name: "Server Name",
+              ru: "3U",
+              power: "200" // Default values
+            };
+            console.log(serverInfoDict);
+            self.redrawTiles();
+          }
+        }
+
+        // Toggle the showCoordinates property
+        self.showCoordinates = !self.showCoordinates;
+      }
+    });
     
 
     this.updateCanvasSize();
     this.redrawTiles();
   },
+  
 
-
+  displayInfoBox: function(tileX, tileY, rackId) {
+    if (rackId !== null) {
+      var serverInfo = serverInfoDict[rackId];
+      if (serverInfo) {
+        console.log(serverInfo);
+        console.log(serverInfo.name)
+        // Populate server details with actual data
+        var serverDetailsContainer = $('#server-info-container');
+        serverDetailsContainer.empty();
+        serverDetailsContainer.append('<h2>Server Details</h2>');
+        serverDetailsContainer.append('<p><strong>ID:</strong> ' + rackId + '</p>');
+        serverDetailsContainer.append('<p><strong>Name:</strong> <span id="server-name">' + serverInfo.name + '</span></p>');
+        serverDetailsContainer.append('<p><strong>RU:</strong> <span id="server-ru">' + serverInfo.ru + '</span></p>');
+        serverDetailsContainer.append('<p><strong>Power:</strong> <span id="server-power">' + serverInfo.power + ' watts</span></p>');
+        serverDetailsContainer.append('<button id="close-server-info">Close</button>');
+        serverDetailsContainer.append('<button id="modify-server-details">Modify</button>');
+  
+        // Show the overlay
+        $('#server-info-overlay').show();
+  
+        // Set the infoBoxOpen flag to true
+        this.infoBoxOpen = true;
+      }
+    }
+  },
 
   updateCanvasSize: function() {
     var width = $(window).width();
@@ -181,6 +263,9 @@ var Isometric = {
   isCursorOnMap: function() {
     return (this.selectedTileX >= 0 && this.selectedTileX < this.Xtiles &&
             this.selectedTileY >= 0 && this.selectedTileY < this.Ytiles);
+  },
+  generateRandomRackId: function() {
+    return Math.floor(Math.random() * 1000); // You can adjust the range as needed
   },
 
   drawTile: function(Xi, Yi) {
@@ -220,4 +305,88 @@ var Isometric = {
     this.context.lineTo(x2, y2);
     this.context.stroke();
   },
+
+  closeInfoBox: function() {
+    // Hide the overlay
+    $('#server-info-overlay').hide();
+    // Set the infoBoxOpen flag to false
+    this.infoBoxOpen = false;
+    // Re-enable canvas click events
+    this.canvasClickEnabled = true;
+  },
 };
+
+$(document).on('click', '#close-server-info', function() {
+  Isometric.closeInfoBox(); // Call the closeInfoBox method
+});
+
+$('#server-info-overlay').on('click', '#modify-server-details', function() {
+  var rackId = currentID;
+  showEditServerDetails(rackId);
+});
+
+function showEditServerDetails(rackId) {
+  var serverDetailsContainer = $('#server-info-container');
+  var serverInfo = serverInfoDict[rackId];
+  if (!serverInfo) {
+    console.error("Server info not found for rack ID:", rackId);
+    // Handle the error appropriately, maybe alert the user
+    return;
+  }
+
+  // Replace server details with input fields for editing
+  serverDetailsContainer.empty();
+  serverDetailsContainer.append('<h2>Edit Server Details</h2>');
+  serverDetailsContainer.append('<p><strong>ID:</strong> ' + rackId + '</p>');
+  serverDetailsContainer.append('<label for="server-name">Name:</label>');
+  serverDetailsContainer.append('<input type="text" id="server-name" value="' + serverInfo.name + '"><br>');
+  serverDetailsContainer.append('<label for="server-ru">RU:</label>');
+  serverDetailsContainer.append('<input type="text" id="server-ru" value="' + serverInfo.ru + '"><br>');
+  serverDetailsContainer.append('<label for="server-power">Power (watts):</label>');
+  serverDetailsContainer.append('<input type="text" id="server-power" value="' + serverInfo.power + '"><br>');
+  serverDetailsContainer.append('<button id="save-server-details">Save</button>');
+
+  // Add click handler for the Save button
+
+}
+
+// Function to display updated server details after saving
+function displayUpdatedServerDetails(rackId) {
+  var serverInfo = serverInfoDict[rackId];
+  $('#server-name').text(serverInfo.name);
+  $('#server-ru').text(serverInfo.ru);
+  $('#server-power').text(serverInfo.power + ' watts');
+}
+
+// Add click handler for the Modify button in the displayed info box
+$(document).on('click', '#modify-server-details', function() {
+  var rackId = currentID;
+  showEditServerDetails(rackId);
+});
+
+$(document).on('click', '#save-server-details', function () {
+  var rackId = currentID;
+  var editedName = $('#server-name').val();
+  var editedRU = $('#server-ru').val();
+  var editedPower = $('#server-power').val();
+
+  // Update the server details in memory (serverInfoDict)
+  serverInfoDict[rackId] = {
+    name: editedName,
+    ru: editedRU,
+    power: editedPower
+  };
+
+  // Display the updated server details
+  //displayUpdatedServerDetails(rackId);
+  var serverDetailsContainer = $('#server-info-container');
+  // Re-enable the Modify button
+  serverDetailsContainer.empty();
+  serverDetailsContainer.append('<h2>Server Details</h2>');
+  serverDetailsContainer.append('<p><strong>ID:</strong> ' + rackId + '</p>');
+  serverDetailsContainer.append('<p><strong>Name:</strong> <span id="server-name">' + editedName + '</span></p>');
+  serverDetailsContainer.append('<p><strong>RU:</strong> <span id="server-ru">' + editedRU + '</span></p>');
+  serverDetailsContainer.append('<p><strong>Power:</strong> <span id="server-power">' + editedPower + ' watts</span></p>');
+  serverDetailsContainer.append('<button id="close-server-info">Close</button>');
+  serverDetailsContainer.append('<button id="modify-server-details">Modify</button>');
+});
