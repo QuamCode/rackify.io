@@ -1,7 +1,5 @@
 // A simple isometric tile renderer
 var Isometric = {
-  tileColumnOffset: 100, // pixels
-  tileRowOffset: 50, // pixels
 
   originX: 0, // offset from left
   originY: 0, // offset from top
@@ -50,7 +48,7 @@ var Isometric = {
   generateBlankMap: function() {
     IsometricMap.map = new Array(this.userDefinedXtiles);
     for (var i = 0; i < this.userDefinedXtiles; i++) {
-      IsometricMap.map[i] = new Array(this.userDefinedYtiles).fill(0); // Fill with default tile index
+      IsometricMap.map[i] = new Array(this.userDefinedYtiles).fill(1); // Fill with default tile index
     }
   },
 
@@ -117,12 +115,30 @@ var Isometric = {
   
       self.selectedTileX = tileX;
       self.selectedTileY = tileY;
+     // console.log(tileX, tileY);
       self.redrawTiles();
     });
 
-    $(window).on('click', function() {
+    $(window).on('click', function(event) {
+      var canvasOffset = self.canvas.offset();
+      var mouseX = event.clientX - canvasOffset.left;
+      var mouseY = event.clientY - canvasOffset.top;
+    
+      // Calculate the clicked tile coordinates
+      var tileX = Math.round((mouseX - self.tileColumnOffset / 2 - self.originX) / self.tileColumnOffset - (mouseY - self.tileRowOffset / 2 - self.originY) / self.tileRowOffset);
+      var tileY = Math.round((mouseX - self.tileColumnOffset / 2 - self.originX) / self.tileColumnOffset + (mouseY - self.tileRowOffset / 2 - self.originY) / self.tileRowOffset);
+    
+      // Check if the clicked tile is within bounds
+      if (tileX >= 0 && tileX < self.Xtiles && tileY >= 0 && tileY < self.Ytiles) {
+        // Change the tile in the map index to 0
+        IsometricMap.map[tileX][tileY] = 0;
+    
+        // Redraw the tiles to reflect the change
+        self.redrawTiles();
+      }
+    
+      // Toggle the showCoordinates property
       self.showCoordinates = !self.showCoordinates;
-      self.redrawTiles();
     });
 
     
@@ -172,7 +188,12 @@ var Isometric = {
     var offY = Yi * this.tileRowOffset / 2 - Xi * this.tileRowOffset / 2 + this.originY;
 
     var imageIndex = IsometricMap.map[Xi][Yi];
-    this.context.drawImage(this.tileImages[imageIndex], offX, offY);
+    var verticalOffset = 0;
+    if (imageIndex === 0) {
+      // Tile 0 is twice the height of other tiles (adjust as needed)
+      verticalOffset = this.tileRowOffset * 1.32;
+    }
+    this.context.drawImage(this.tileImages[imageIndex], offX, offY - verticalOffset);
 
     if(this.showCoordinates) {
       this.context.fillStyle = 'orange';
