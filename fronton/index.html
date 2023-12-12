@@ -3,102 +3,194 @@
 <head>
     <title>Rack Planner</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-        #rack {
-            width: 200px;
-            height: 400px;
-            position: relative; /* Changed from absolute for layout */
-            margin: 0 auto; /* Center rack */
-            background-color: #ddd;
-            border: 2px solid #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .rack-unit, .rack-unit1, .rack-unit2 {
-            width: 196px;
-            height: 50px;
-            margin: 2px 0;
-            cursor: pointer; /* Changed to pointer */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-        .rack-unit { background-color: #007bff; }
-        .rack-unit1 { background-color: #28a745; }
-        .rack-unit2 { background-color: #dc3545; }
-        .highlight {
-            position: absolute;
-            width: 100%;
-            background-color: rgba(0, 255, 0, 0.3);
-            pointer-events: none;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            margin: 5px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #createUnitForm {
-            display: flex;
-            justify-content: center;
-            margin-top: 15px;
-        }
-        #createUnitForm input {
-            padding: 5px;
-            margin-right: 5px;
-            border-radius: 3px;
-            border: 1px solid #ddd;
-        }
-        #rackInfo {
-            margin-top: 15px;
-            text-align: center;
-        }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+#rack {
+    width: 200px;
+    height: 400px;
+    position: relative;
+    margin: 0 auto;
+    background-color: #f0f0f0; /* Light gray background */
+    border: 2px solid #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+}
+
+.rack-unit, .rack-unit1, .rack-unit2 {
+    width: 100%; /* Full width */
+    height: 50px;
+    margin: 2px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    background-color: #007bff;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.rack-unit1 { background-color: #28a745; }
+.rack-unit2 { background-color: #dc3545; }
+
+.rack-unit:hover, .rack-unit1:hover, .rack-unit2:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slight scaling effect on hover */
+}
+
+.highlight {
+    position: absolute;
+    width: 100%;
+    background-color: rgba(0, 255, 0, 0.3);
+    pointer-events: none;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#createUnitForm {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+#createUnitForm input {
+    padding: 10px;
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    transition: border-color 0.3s;
+}
+
+#createUnitForm input:focus {
+    border-color: #007bff; /* Blue border on input focus */
+    outline: none;
+}
+
+#rackInfo {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 220px; /* Wider side menu */
+    height: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Updated button styles */
+.side-menu button {
+    width: 100%; /* Full width for buttons */
+    padding: 10px; /* Adjust padding for better fit */
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s;
+    text-align: left; /* Align text to the left */
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflowing text */
+    text-overflow: ellipsis; /* Show ellipsis (...) for long text */
+}
+
+.side-menu button:hover {
+    background-color: #dee2e6;
+}
+
+.rack-container {
+    margin-left: 240px; /* Space for the side menu */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.equipment {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s;
+}
+
+.equipment:hover {
+    background-color: #dee2e6;
+}
     </style>
 </head>
 <body>
 
-<div id="rack"></div>
+    <div class="side-menu">
+        <h4>Equipment Library</h4>
+        <div id="accordion">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </div>
+    <br>
+    <br>
 
-<div class="rack-unit1" draggable="true">Unit 1</div>
-<div class="rack-unit2" draggable="true">Unit 2</div>
-<div class="rack-unit" draggable="true">Unit 3</div>
-
-<div id="controls">
-    <button id="increaseHeight">Increase Height</button>
-    <button id="decreaseHeight">Decrease Height</button>
+<div class="rack-container">
+    <!-- Rack and Controls -->
+    <div id="rack"></div>
+    <div id="controls">
+        <button id="increaseHeight">Increase Height</button>
+        <button id="decreaseHeight">Decrease Height</button>
+    </div>
+    <div id="rackInfo">
+        <p>Current Rack Size: <span id="currentRackSize">0</span> RU</p>
+    </div>
+    <div id="createUnitForm">
+        <input type="text" id="newUnitName" placeholder="Unit Name">
+        <input type="number" id="newUnitHeight" placeholder="Height (RU)">
+        <button id="createNewUnit">Create Unit</button>
+    </div>
 </div>
 
-<div id="rackInfo">
-    <p>Current Rack Size: <span id="currentRackSize">0</span> RU</p>
-</div>
 
-<div id="createUnitForm">
-    <input type="text" id="newUnitName" placeholder="Unit Name">
-    <input type="number" id="newUnitHeight" placeholder="Height (RU)">
-    <button id="createNewUnit">Create Unit</button>
-</div>
+
+
+
+
 <script>
 $(document).ready(function() {
     const rack = $('#rack');
     const unitHeightRU = 1; // Each unit height in RU
-    const rackUnitPixelHeight = 54; // Pixel height of each RU
+    const rackUnitPixelHeight = 27; // Pixel height of each RU
     let rackHeightRU = 8; // Initial rack height in RU (adjustable)
     let usedUnitsRU = 0; // Track the number of units in the rack in RU
 
@@ -108,11 +200,11 @@ $(document).ready(function() {
 
     function calculateUsedUnits() {
         usedUnitsRU = 0;
-        rack.find('.rack-unit, .rack-unit1, .rack-unit2').each(function() {
-            let unitHeight = $(this).data('ru') || unitHeightRU; // Get RU from data attribute or default to 1
+        rack.find('.rack-unit').each(function() {
+            let unitHeight = $(this).data('ru') || unitHeightRU;
             usedUnitsRU += unitHeight;
         });
-        updateRackDisplay(); // Update display after calculation
+        updateRackDisplay();
     }
 
     function updateRackHeight() {
@@ -120,93 +212,186 @@ $(document).ready(function() {
         rack.height(pixelHeight);
     }
 
-    $('.rack-unit, .rack-unit1, .rack-unit2').on('dragstart', function(event) {
-        event.originalEvent.dataTransfer.setData("text/plain", event.target.outerHTML);
-    });
-
-    rack.on('dragover', function(event) {
-        event.preventDefault();
-        if (usedUnitsRU < rackHeightRU) {
-            const rackRect = rack[0].getBoundingClientRect();
-            let yPos = event.originalEvent.clientY - rackRect.top;
-            yPos = Math.floor(yPos / rackUnitPixelHeight) * rackUnitPixelHeight;
-            $(this).find('.highlight').remove();
-            $('<div class="highlight"></div>').css({
-                'height': rackUnitPixelHeight + 'px',
-                'top': yPos + 'px'
-            }).appendTo(this);
-        }
-    });
-
-    rack.on('drop', function(event) {
-        event.preventDefault();
-        $(this).find('.highlight').remove();
-        if (usedUnitsRU < rackHeightRU) {
-            const rackRect = rack[0].getBoundingClientRect();
-            let yPos = event.originalEvent.clientY - rackRect.top;
-            yPos = Math.floor(yPos / rackUnitPixelHeight) * rackUnitPixelHeight;
-            const data = event.originalEvent.dataTransfer.getData("text/plain");
-            let newUnit = $(data).css('top', yPos + 'px');
-
-            rack.append(newUnit);
-            calculateUsedUnits();
-        }
-    });
-
-    rack.on('dragleave', function(event) {
-        $(this).find('.highlight').remove();
-    });
-
-    $('#increaseHeight').click(function() {
-        rackHeightRU += unitHeightRU;
-        updateRackHeight();
-        calculateUsedUnits(); // Recalculate after changing the rack height
-    });
-
-    $('#decreaseHeight').click(function() {
-        if (rackHeightRU > usedUnitsRU) {
-            rackHeightRU -= unitHeightRU;
-            updateRackHeight();
-            calculateUsedUnits(); // Recalculate after changing the rack height
-        }
-    });
-
-    $('#createNewUnit').click(function() {
-        const unitName = $('#newUnitName').val();
-        const unitHeightRU = parseInt($('#newUnitHeight').val(), 10) || 1; // Default to 1 RU if not specified
-        if (rackHeightRU < unitHeightRU + usedUnitsRU) {
+    // Function to handle the creation of new units
+    function createNewUnit(unitName, unitHeightRU, unitTypeClass) {
+        if (rackHeightRU < usedUnitsRU + unitHeightRU) {
             return;
         }
         const newUnit = $('<div></div>')
-            .addClass('rack-unit')
-            .css({'height': (unitHeightRU * rackUnitPixelHeight - 4) + 'px'}) // Adjust for margin
-            .text(unitName) // Add the unit name as text
-            .data('ru', unitHeightRU); // Store the RU in a data attribute
+            .addClass('rack-unit ' + unitTypeClass)
+            .css({'height': (unitHeightRU * rackUnitPixelHeight - 4) + 'px'})
+            .text(unitName)
+            .data('ru', unitHeightRU);
 
         rack.append(newUnit);
         calculateUsedUnits();
+    }
+
+    // Handling drag from the equipment library
+    $('.equipment').on('dragstart', function(event) {
+        let equipmentData = {
+            name: $(this).text(),
+            ru: $(this).data('ru') || unitHeightRU,
+            typeClass: $(this).data('typeClass') || 'default-equipment'
+        };
+        event.originalEvent.dataTransfer.setData("equipment", JSON.stringify(equipmentData));
     });
 
-    // Method to remove units from the rack
-    rack.on('click', '.rack-unit, .rack-unit1, .rack-unit2', function() {
+    rack.on('dragover', dragOverHandler);
+    rack.on('drop', dropHandler);
+    rack.on('dragleave', dragLeaveHandler);
+
+    $('#createNewUnit').click(function() {
+        const unitName = $('#newUnitName').val();
+        const unitHeightRU = parseInt($('#newUnitHeight').val(), 10) || 1;
+        createNewUnit(unitName, unitHeightRU, 'custom-unit');
+    });
+
+    rack.on('click', '.rack-unit', function() {
         $(this).remove();
-        calculateUsedUnits(); // Recalculate used units after removal
+        calculateUsedUnits();
     });
 
     rack.sortable({
-        items: '.rack-unit, .rack-unit1, .rack-unit2',
+        items: '.rack-unit',
         axis: 'y',
         containment: 'parent',
         tolerance: 'pointer',
         cursor: 'move',
         stop: function() {
-            calculateUsedUnits(); // Recalculate used units after sorting
+            calculateUsedUnits();
+        }
+    });
+    $('#increaseHeight').click(function() {
+    rackHeightRU += unitHeightRU;
+    updateRackHeight();
+    calculateUsedUnits();
+    });
+
+    $('#decreaseHeight').click(function() {
+        if (rackHeightRU - unitHeightRU >= usedUnitsRU) {
+            rackHeightRU -= unitHeightRU;
+            updateRackHeight();
+            calculateUsedUnits();
         }
     });
 
+    function dragOverHandler(event) {
+    event.preventDefault();
+    if (usedUnitsRU < rackHeightRU) {
+        const rackRect = rack[0].getBoundingClientRect();
+        let yPos = event.originalEvent.clientY - rackRect.top;
+        let highlightHeight = rackUnitPixelHeight;
+        
+        const data = event.originalEvent.dataTransfer.getData("equipment");
+        if (data) {
+            let equipmentData = JSON.parse(data);
+            highlightHeight *= equipmentData.ru;
+        }
+        
+        yPos = Math.floor(yPos / rackUnitPixelHeight) * rackUnitPixelHeight;
+        $(this).find('.highlight').remove();
+        $('<div class="highlight"></div>').css({
+            'height': highlightHeight + 'px',
+            'top': yPos + 'px'
+        }).appendTo(this);
+    }
+}
+
+    function dropHandler(event) {
+        event.preventDefault();
+        $(this).find('.highlight').remove();
+        if (usedUnitsRU < rackHeightRU) {
+            const data = event.originalEvent.dataTransfer.getData("equipment");
+            if (data) {
+                let equipmentData = JSON.parse(data);
+                createNewUnit(equipmentData.name, equipmentData.ru, equipmentData.typeClass);
+            }
+        }
+    }
+
+    function dragLeaveHandler(event) {
+        $(this).find('.highlight').remove();
+    }
+
+    $('body').on('dragstart', '.equipment', function(event) {
+        let equipmentData = {
+            name: $(this).text(),
+            ru: $(this).data('ru') || unitHeightRU,
+            typeClass: $(this).data('typeClass') || 'default-equipment'
+        };
+        event.originalEvent.dataTransfer.setData("equipment", JSON.stringify(equipmentData));
+    });
+
+    // Initialize the equipment library
+    function initEquipmentLibrary() {
+        const categories = {
+            'Network Devices': [
+                { name: 'Router', ru: 2, typeClass: 'router' },
+                { name: 'Switch', ru: 1, typeClass: 'switch' },
+                { name: 'Firewall', ru: 1, typeClass: 'firewall' },
+                { name: 'Load Balancer', ru: 1, typeClass: 'load-balancer' },
+                { name: 'Access Point', ru: 1, typeClass: 'access-point' },
+            ],
+            'Storage': [
+                { name: 'NAS', ru: 2, typeClass: 'nas' },
+                { name: 'SAN', ru: 4, typeClass: 'san' },
+            ],
+            'Servers': [
+                { name: 'Web Server', ru: 2, typeClass: 'web-server' },
+                { name: 'Database Server', ru: 2, typeClass: 'database-server' },
+                { name: 'Application Server', ru: 2, typeClass: 'app-server' },
+            ],
+            'Power Equipment': [
+                { name: 'UPS', ru: 2, typeClass: 'ups' },
+                { name: 'PDU', ru: 1, typeClass: 'pdu' },
+            ]
+            // Additional categories as needed
+        };
+
+        Object.entries(categories).forEach(([category, equipments], index) => {
+            const card = $('<div></div>').addClass('card');
+            const cardHeader = $('<div></div>').addClass('card-header').appendTo(card);
+            const cardTitle = $('<h5></h5>').addClass('mb-0').appendTo(cardHeader);
+
+            const button = $('<button></button>')
+                .addClass('btn btn-link')
+                .attr({
+                    'data-toggle': 'collapse',
+                    'data-target': `#collapse${index}`,
+                    'aria-expanded': 'false',
+                    'aria-controls': `collapse${index}`
+                })
+                .text(category)
+                .appendTo(cardTitle);
+
+            const collapseDiv = $('<div></div>')
+                .addClass('collapse')
+                .attr('id', `collapse${index}`)
+                .data('parent', '#accordion')
+                .appendTo(card);
+
+            const cardBody = $('<div></div>').addClass('card-body').appendTo(collapseDiv);
+
+            equipments.forEach(equip => {
+                $('<div></div>')
+                    .addClass(`equipment ${equip.typeClass}`)
+                    .attr('draggable', true)
+                    .data('ru', equip.ru)
+                    .data('typeClass', equip.typeClass)
+                    .text(equip.name)
+                    .appendTo(cardBody);
+            });
+
+            card.appendTo('#accordion');
+        });
+    }
+
+    initEquipmentLibrary();
+
     // Call update functions on load
     updateRackHeight();
-    calculateUsedUnits(); // Initial calculation of used units
+    calculateUsedUnits();
 });
 </script>
 
