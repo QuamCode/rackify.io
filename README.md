@@ -1,5 +1,8 @@
 # Rack Planner
 
+[Rack Editor](./fronton/index.html)
+[Data Center Editor](./isometric/index.html)
+
 Rack Planner is an interactive tool designed for efficient planning and organisation of server racks. It features a dynamic isometric tile set and an integrated rack planning interface, allowing users to visualise and design server rack layouts effectively.
 
 ![RackPlanner](https://github.com/QuamCode/rackify.io/assets/36869195/08456df6-477b-4749-91ba-126a3cc9578a)
